@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "599757311255",
+    "project_id": "syamapp-955e0",
+    "storage_bucket": "syamapp-955e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:599757311255:android:7cb3f62dac41883ddf7b52",
+        "android_client_info": {
+          "package_name": "com.syam.creditcard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "599757311255-pkb8d7tlujkedhh9jsif3d0a7c0n7a6h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.syam.creditcard",
+            "certificate_hash": "0000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "client_id": "599757311255-qi2vrb3omuo7h1627ro0u525dtloc6bg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.syam.creditcard",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "599757311255-uct94hit35oh1qdeua3q6eblecodeog5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBvVyEfKX7m3iecxYoTZT-11G8UFp0LT0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "599757311255-uct94hit35oh1qdeua3q6eblecodeog5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "599757311255-vm4obp10agjef6u8m7vsi9gfe3qkfev5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.syam.creditcard"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

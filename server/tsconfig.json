@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "strict": true,
+    "resolveJsonModule": true, // Enable JSON module imports
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
+}

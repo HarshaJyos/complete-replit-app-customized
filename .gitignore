@@ -1,0 +1,5 @@
+node_modules
+.expo
+firebase.json
+.env
+.env.local
