@@ -2,10 +2,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  User,
   signInWithCredential,
+  getAdditionalUserInfo,
+  UserCredential,
 } from "firebase/auth";
-import { UserCredential, AdditionalUserInfo } from "firebase/auth";
 import { auth } from "../config/firebase";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
@@ -15,34 +15,24 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 class FirebaseAuthService {
   private provider = new GoogleAuthProvider();
 
-  // Initialize Firebase and notifications
   async initialize() {
-    console.log("Initializing Firebase Auth Service...");
     try {
-      // Configure Google Sign-In
       GoogleSignin.configure({
-        webClientId: "your-web-client-id-from-firebase-console", // Replace with Web client ID from Firebase Console > Auth > Google
-        offlineAccess: true, // Required for idToken
+        webClientId: "your-web-client-id-from-firebase-console", // Replace with real Web client ID
+        offlineAccess: true,
       });
-
       await this.registerForPushNotifications();
-      console.log("Firebase Auth Service initialized successfully");
     } catch (error) {
-      console.error("Firebase Auth initialization failed:", error);
+      console.error("Initialization failed:", error);
       throw error;
     }
   }
 
-  // Get current user
-  getCurrentUser(): User | null {
+  getCurrentUser() {
     return auth.currentUser;
   }
 
-  // Email/Password Sign Up
-  async signUpWithEmail(
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; error?: string }> {
+  async signUpWithEmail(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       return { success: true };
@@ -51,11 +41,7 @@ class FirebaseAuthService {
     }
   }
 
-  // Email/Password Sign In
-  async signInWithEmail(
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; error?: string }> {
+  async signInWithEmail(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
@@ -64,7 +50,6 @@ class FirebaseAuthService {
     }
   }
 
-  // Google Sign In
   async signInWithGoogle(): Promise<{
     success: boolean;
     isNewUser?: boolean;
@@ -75,19 +60,11 @@ class FirebaseAuthService {
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.data?.idToken;
       if (!idToken) {
-        return {
-          success: false,
-          error: "No idToken received from Google Sign-In",
-        };
+        return { success: false, error: "No idToken received" };
       }
       const credential = GoogleAuthProvider.credential(idToken);
-      const userCredential: UserCredential = await signInWithCredential(
-        auth,
-        credential
-      );
-      const additionalInfo: AdditionalUserInfo | null =
-        (userCredential as any).additionalUserInfo ?? null;
-
+      const userCredential: UserCredential = await signInWithCredential(auth, credential);
+      const additionalInfo = getAdditionalUserInfo(userCredential);
       const isNewUser = additionalInfo?.isNewUser || false;
       return { success: true, isNewUser };
     } catch (error: any) {
@@ -95,7 +72,6 @@ class FirebaseAuthService {
     }
   }
 
-  // Sign Out
   async signOut(): Promise<void> {
     try {
       await GoogleSignin.signOut();
@@ -106,40 +82,24 @@ class FirebaseAuthService {
     }
   }
 
-  // Register for push notifications with error handling
   private async registerForPushNotifications() {
-    console.log("Registering for push notifications...");
-    if (!Notifications || !Notifications.getExpoPushTokenAsync) {
-      console.warn("Notifications API not available");
-      return;
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
     }
 
-    try {
-      if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("default", {
-          name: "default",
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: "#FF231F7C",
-        });
-      }
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") return;
 
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Notification permissions not granted");
-        return;
-      }
-
-      const projectId = "syamapp-955e0"; // From your firebaseConfig
-      const token = (await Notifications.getExpoPushTokenAsync({ projectId }))
-        .data;
-      console.log("Push token acquired:", token);
-      const user = this.getCurrentUser();
-      if (user) {
-        await apiService.updateUserProfile(user.uid, { pushToken: token });
-      }
-    } catch (error) {
-      console.error("Error registering for push notifications:", error);
+    const projectId = "your-project-id"; // Replace with your Firebase projectId
+    const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+    const user = this.getCurrentUser();
+    if (user) {
+      await apiService.updateUserProfile(user.uid, { pushToken: token });
     }
   }
 }

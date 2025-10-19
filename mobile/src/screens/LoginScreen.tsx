@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert, ViewStyle } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { View, StyleSheet, Alert } from "react-native";
+import { Button, TextInput, useTheme } from "react-native-paper";
 import { firebaseAuthService } from "../services/firebaseAuthService";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/navigation";
-import { StyleProp, TextStyle } from "react-native";
 
-// Define the navigation param list
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface LoginScreenProps {
@@ -16,11 +14,12 @@ interface LoginScreenProps {
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const theme = useTheme();
 
   const handleLogin = async () => {
     const result = await firebaseAuthService.signInWithEmail(email, password);
     if (result.success) {
-      navigation.replace("Recommendations");
+      navigation.replace("Main");
     } else {
       Alert.alert("Error", result.error || "Login failed");
     }
@@ -29,28 +28,28 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const handleGoogle = async () => {
     const result = await firebaseAuthService.signInWithGoogle();
     if (result.success) {
-      navigation.replace(result.isNewUser ? "ProfileSetup" : "Recommendations");
+      navigation.replace(result.isNewUser ? "ProfileSetup" : "Main");
     } else {
       Alert.alert("Error", result.error || "Google login failed");
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <TextInput
-        style={styles.input as StyleProp<TextStyle>}
-        placeholder="Email"
+        label="Email"
         value={email}
         onChangeText={setEmail}
-        placeholderTextColor="#FFFFFF"
+        style={styles.input}
+        theme={theme}
       />
       <TextInput
-        style={styles.input as StyleProp<TextStyle>}
-        placeholder="Password"
+        label="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        placeholderTextColor="#FFFFFF"
+        style={styles.input}
+        theme={theme}
       />
       <Button mode="contained" onPress={handleLogin} style={styles.button}>
         Login
@@ -58,12 +57,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       <Button mode="contained" onPress={handleGoogle} style={styles.button}>
         Google Login
       </Button>
-      <Button
-        mode="text"
-        onPress={() => navigation.navigate("Register")}
-        style={styles.textButton as StyleProp<ViewStyle>}
-        textColor="#FFFFFF"
-      >
+      <Button mode="text" onPress={() => navigation.navigate("Register")} textColor={theme.colors.onSurface}>
         Register
       </Button>
     </View>
@@ -71,21 +65,9 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000000",
-    padding: 16,
-    justifyContent: "center",
-  },
-  input: {
-    color: "#FFFFFF",
-    borderBottomColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    marginBottom: 16,
-    backgroundColor: "transparent", // Required for react-native-paper TextInput
-  },
-  button: { backgroundColor: "#00FF00", marginBottom: 8 },
-  textButton: { color: "#FFFFFF" },
+  container: { flex: 1, padding: 32, justifyContent: "center" },
+  input: { marginBottom: 16, backgroundColor: "#1A1A1A" },
+  button: { marginBottom: 16, borderRadius: 8 },
 });
 
 export default LoginScreen;

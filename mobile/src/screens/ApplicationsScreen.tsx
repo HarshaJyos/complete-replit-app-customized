@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
-import { Text, Card, Button, ActivityIndicator } from "react-native-paper";
+import { Text, Card, ActivityIndicator, useTheme } from "react-native-paper";
 import { apiService } from "../services/api";
 import { firebaseAuthService } from "../services/firebaseAuthService";
 import { Application } from "../../../shared/schema";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/navigation";
 
-// Define navigation prop type
-type ApplicationsScreenNavigationProp =
-  NativeStackNavigationProp<RootStackParamList>;
+type ApplicationsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface ApplicationsScreenProps {
   navigation: ApplicationsScreenNavigationProp;
@@ -18,6 +16,7 @@ interface ApplicationsScreenProps {
 const ApplicationsScreen = ({ navigation }: ApplicationsScreenProps) => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     fetchApplications();
@@ -47,46 +46,41 @@ const ApplicationsScreen = ({ navigation }: ApplicationsScreenProps) => {
     return (
       <ActivityIndicator
         animating={true}
-        color="#00FF00"
+        color={theme.colors.primary}
         style={styles.loading}
       />
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>My Applications</Text>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+<Text style={[styles.title, { color: theme.colors.onSurface }]}>My Applications</Text>
       {applications.map((app) => (
-        <Card key={app.id} style={styles.card}>
+        <Card key={app.id} style={[styles.card, { backgroundColor: theme.colors.surface }]}>
           <Card.Content>
-            <Text style={styles.cardName}>{app.creditCard.name}</Text>
-            <Text style={styles.status}>Status: {app.status}</Text>
-            <Text style={styles.date}>
-              Applied: {new Date(app.appliedAt).toLocaleDateString()}
-            </Text>
+<Text style={[styles.cardName, { color: theme.colors.onSurface }]}>{app.creditCard.name}</Text>
+<Text style={[styles.status, { color: theme.colors.primary }]}>Status: {app.status}</Text>
+            <Text style={[styles.date, { color: theme.colors.onSurface }]}>
+  Applied: {new Date(app.appliedAt).toLocaleDateString()}
+</Text>
           </Card.Content>
         </Card>
       ))}
       {applications.length === 0 && (
-        <Text style={styles.noData}>No applications yet</Text>
+        <Text style={[styles.noData, { color: theme.colors.onSurface }]}>No applications yet</Text>
       )}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000000", padding: 16 },
-  title: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  card: { backgroundColor: "#1A1A1A", marginBottom: 16 },
-  cardName: { color: "#FFFFFF", fontWeight: "bold" },
-  status: { color: "#00FF00" },
-  date: { color: "#FFFFFF" },
-  noData: { color: "#FFFFFF", textAlign: "center" },
+  container: { flex: 1, padding: 24 }, // Increased padding
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 24 },
+  card: { marginBottom: 16, borderRadius: 12, elevation: 2 },
+  cardName: { fontWeight: "bold", fontSize: 18 },
+  status: { fontSize: 16, marginVertical: 8 },
+  date: { fontSize: 14, opacity: 0.8 },
+  noData: { textAlign: "center", fontSize: 16 },
   loading: { flex: 1, justifyContent: "center" },
 });
 

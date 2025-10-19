@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { TextInput, Button } from "react-native-paper";
+import { TextInput, Button, useTheme } from "react-native-paper";
 import { firebaseAuthService } from "../services/firebaseAuthService";
-import { RootStackParamList } from "@/types/navigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StyleProp, ViewStyle } from "react-native";
+import { RootStackParamList } from "@/types/navigation";
 
-// Define navigation prop type
-type RegisterScreenNavigationProp =
-  NativeStackNavigationProp<RootStackParamList>;
+type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface RegisterScreenProps {
   navigation: RegisterScreenNavigationProp;
@@ -17,6 +14,7 @@ interface RegisterScreenProps {
 const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const theme = useTheme();
 
   const handleRegister = async () => {
     const result = await firebaseAuthService.signUpWithEmail(email, password);
@@ -30,28 +28,28 @@ const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
   const handleGoogle = async () => {
     const result = await firebaseAuthService.signInWithGoogle();
     if (result.success) {
-      navigation.replace(result.isNewUser ? "ProfileSetup" : "Recommendations");
+      navigation.replace(result.isNewUser ? "ProfileSetup" : "Main");
     } else {
       Alert.alert("Error", result.error || "Google sign-up failed");
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <TextInput
-        style={styles.input}
-        placeholder="Email"
+        label="Email"
         value={email}
         onChangeText={setEmail}
-        placeholderTextColor="#FFFFFF"
+        style={styles.input}
+        theme={theme}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Password"
+        label="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        placeholderTextColor="#FFFFFF"
+        style={styles.input}
+        theme={theme}
       />
       <Button mode="contained" onPress={handleRegister} style={styles.button}>
         Register
@@ -59,12 +57,7 @@ const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
       <Button mode="contained" onPress={handleGoogle} style={styles.button}>
         Google Sign Up
       </Button>
-      <Button
-        mode="text"
-        onPress={() => navigation.navigate("Login")}
-        style={styles.textButton as StyleProp<ViewStyle>}
-        textColor="#FFFFFF"
-      >
+      <Button mode="text" onPress={() => navigation.navigate("Login")} textColor={theme.colors.onSurface}>
         Login
       </Button>
     </View>
@@ -72,26 +65,9 @@ const RegisterScreen = ({ navigation }: RegisterScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000000",
-    padding: 16,
-    justifyContent: "center",
-  },
-  input: {
-    color: "#FFFFFF",
-    borderBottomColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    marginBottom: 16,
-    backgroundColor: "transparent",
-  },
-  button: {
-    backgroundColor: "#00FF00",
-    marginBottom: 8,
-  },
-  textButton: {
-    marginTop: 8,
-  },
+  container: { flex: 1, padding: 32, justifyContent: "center" },
+  input: { marginBottom: 16, backgroundColor: "#1A1A1A" },
+  button: { marginBottom: 16, borderRadius: 8 },
 });
 
 export default RegisterScreen;

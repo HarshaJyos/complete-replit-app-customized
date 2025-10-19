@@ -1,8 +1,8 @@
 import React from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native"; // Import Text from react-native
+import { View, StyleSheet, ScrollView } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 import { CreditCard } from "../../../shared/schema";
 
-// Define props type for route params
 interface ComparisonScreenProps {
   route: {
     params: {
@@ -13,47 +13,47 @@ interface ComparisonScreenProps {
 
 const ComparisonScreen = ({ route }: ComparisonScreenProps) => {
   const { cards } = route.params;
+  const theme = useTheme();
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Compare Cards</Text>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.title, { color: theme.colors.onSurface }]}>Compare Cards</Text>
       <View style={styles.table}>
-        <Text style={styles.header}>Feature</Text>
+        <Text style={[styles.header, { color: theme.colors.onSurface }]}>Feature</Text>
         {cards.map((card) => (
-          <Text key={card.id} style={styles.header}>
+          <Text key={card.id} style={[styles.header, { color: theme.colors.onSurface }]}>
             {card.name}
           </Text>
         ))}
       </View>
-      {/* Rows for features */}
       <View style={styles.row}>
-        <Text style={styles.feature}>Annual Fee</Text>
+        <Text style={[styles.feature, { color: theme.colors.onSurface }]}>Annual Fee</Text>
         {cards.map((card) => (
-          <Text key={card.id} style={styles.value}>
+          <Text key={card.id} style={[styles.value, { color: theme.colors.onSurface }]}>
             ${card.annualFee}
           </Text>
         ))}
       </View>
       <View style={styles.row}>
-        <Text style={styles.feature}>Reward Rate</Text>
+        <Text style={[styles.feature, { color: theme.colors.onSurface }]}>Reward Rate</Text>
         {cards.map((card) => (
-          <Text key={card.id} style={styles.value}>
+          <Text key={card.id} style={[styles.value, { color: theme.colors.onSurface }]}>
             {card.rewardRate}
           </Text>
         ))}
       </View>
       <View style={styles.row}>
-        <Text style={styles.feature}>Signup Bonus</Text>
+        <Text style={[styles.feature, { color: theme.colors.onSurface }]}>Signup Bonus</Text>
         {cards.map((card) => (
-          <Text key={card.id} style={styles.value}>
+          <Text key={card.id} style={[styles.value, { color: theme.colors.onSurface }]}>
             {card.signupBonus}
           </Text>
         ))}
       </View>
       <View style={styles.row}>
-        <Text style={styles.feature}>Category</Text>
+        <Text style={[styles.feature, { color: theme.colors.onSurface }]}>Category</Text>
         {cards.map((card) => (
-          <Text key={card.id} style={styles.value}>
+          <Text key={card.id} style={[styles.value, { color: theme.colors.onSurface }]}>
             {card.category}
           </Text>
         ))}
@@ -63,23 +63,13 @@ const ComparisonScreen = ({ route }: ComparisonScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000000", padding: 16 },
-  title: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  table: { flexDirection: "row", marginBottom: 8 },
-  header: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
-  },
-  row: { flexDirection: "row", marginBottom: 8 },
-  feature: { color: "#FFFFFF", flex: 1, fontWeight: "bold" },
-  value: { color: "#FFFFFF", flex: 1, textAlign: "center" },
+  container: { flex: 1, padding: 24 },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 24 },
+  table: { flexDirection: "row", marginBottom: 16 },
+  header: { fontWeight: "bold", flex: 1, textAlign: "center", fontSize: 16 },
+  row: { flexDirection: "row", marginBottom: 16, paddingVertical: 8 },
+  feature: { flex: 1, fontWeight: "bold", fontSize: 16 },
+  value: { flex: 1, textAlign: "center", fontSize: 16 },
 });
 
 export default ComparisonScreen;

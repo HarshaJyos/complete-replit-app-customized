@@ -8,7 +8,7 @@ import {
 } from "../../../shared/schema";
 
 class ApiService {
-  private baseUrl = "http://localhost:5000/api"; // or production URL
+  private baseUrl = process.env.EXPO_PUBLIC_API_URL || "http://localhost:5000/api"; // Use env for production
 
   private async getHeaders() {
     const user = auth.currentUser;
