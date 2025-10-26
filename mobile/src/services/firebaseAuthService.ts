@@ -18,7 +18,7 @@ class FirebaseAuthService {
   async initialize() {
     try {
       GoogleSignin.configure({
-        webClientId: "your-web-client-id-from-firebase-console", // Replace with real Web client ID
+        webClientId: "599757311255-uct94hit35oh1qdeua3q6eblecodeog5.apps.googleusercontent.com", // Replace with your real Web client ID from Firebase console > Authentication > Google
         offlineAccess: true,
       });
       await this.registerForPushNotifications();
@@ -68,6 +68,7 @@ class FirebaseAuthService {
       const isNewUser = additionalInfo?.isNewUser || false;
       return { success: true, isNewUser };
     } catch (error: any) {
+      console.error("Google Sign-In Error:", error); // Added logging
       return { success: false, error: error.message };
     }
   }
@@ -95,7 +96,7 @@ class FirebaseAuthService {
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== "granted") return;
 
-    const projectId = "your-project-id"; // Replace with your Firebase projectId
+    const projectId = "0d9e5a34-f09e-41f7-948e-89ece1d0fec9"; // From app.json eas.projectId
     const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
     const user = this.getCurrentUser();
     if (user) {

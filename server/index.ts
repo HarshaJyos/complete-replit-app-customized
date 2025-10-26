@@ -4,23 +4,23 @@ import admin from 'firebase-admin';
 import { registerRoutes } from './routes';
 import { seedData } from './seedData';
 import serviceAccount from "./firebase.json";
+import morgan from 'morgan'; // Added import
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
-        credential: admin.credential.cert(
-          serviceAccount as admin.ServiceAccount
-        ),
-      });
+  credential: admin.credential.cert(
+    serviceAccount as admin.ServiceAccount
+  ),
+});
 
 // Initialize Express app
 const app = express();
 app.use(express.json());
+app.use(morgan('dev')); // Added: Log API calls in dev mode
 
 // MongoDB connection
 const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/credit-card-app';
-mongoose.connect(mongoUri, {
-  // Remove deprecated options
-}).then(async () => {
+mongoose.connect(mongoUri).then(async () => {
   console.log('Connected to MongoDB');
   await seedData(); // Seed initial data after connection
 }).catch((error) => {
