@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read/write only their own doc
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Cards are public read-only
+    match /cards/{cardId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Recommendations, applications, notifications – only own sub-collections
+    match /{path=**}/items/{doc} {
+      allow read, write: if request.auth != null && request.auth.uid == path[0];
+    }
+  }
+}

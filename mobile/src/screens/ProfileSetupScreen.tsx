@@ -4,33 +4,34 @@ import { TextInput, Button, SegmentedButtons, useTheme } from "react-native-pape
 import { apiService } from "../services/api";
 import { firebaseAuthService } from "../services/firebaseAuthService";
 import { UserProfile } from "../../../shared/schema";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/types/navigation";
 
-type ProfileSetupScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-interface ProfileSetupScreenProps {
-  navigation: ProfileSetupScreenNavigationProp;
-}
-
-const ProfileSetupScreen = ({ navigation }: ProfileSetupScreenProps) => {
+const ProfileSetupScreen = ({ navigation }: any) => {
   const [income, setIncome] = useState("");
   const [creditScore, setCreditScore] = useState<UserProfile["creditScore"]>("good");
-  const [spendingCategory, setSpendingCategory] = useState<UserProfile["primarySpendingCategory"]>("general");
+  const [spendingCategory, setSpendingCategory] = useState<
+    UserProfile["primarySpendingCategory"]
+  >("general");
   const [monthlySpending, setMonthlySpending] = useState("");
   const theme = useTheme();
 
   const handleSubmit = async () => {
     const user = firebaseAuthService.getCurrentUser();
     if (!user) return;
-    const profile: Partial<UserProfile> = {
+
+    const profile = {
       annualIncome: parseInt(income) || 0,
-      creditScore: creditScore || "good",
-      primarySpendingCategory: spendingCategory || "general",
+      creditScore,
+      primarySpendingCategory: spendingCategory,
       monthlySpending: parseInt(monthlySpending) || 0,
     };
-    await apiService.createUserProfile(user.uid, profile);
-    navigation.navigate("Main");
+
+    try {
+      await apiService.createProfile({ ...profile, userId: user.uid });
+      await apiService.generateRecommendations(user.uid);
+      navigation.replace("Main");
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Something went wrong");
+    }
   };
 
   return (
@@ -43,9 +44,13 @@ const ProfileSetupScreen = ({ navigation }: ProfileSetupScreenProps) => {
         style={styles.input}
         theme={theme}
       />
+
+      {/* ---- Credit Score ---- */}
       <SegmentedButtons
-        value={creditScore || "good"}
-        onValueChange={(value) => setCreditScore(value as UserProfile["creditScore"])}
+        value={creditScore ?? "good"}
+        onValueChange={(v) =>
+          setCreditScore((v ?? "good") as UserProfile["creditScore"])
+        }
         buttons={[
           { value: "poor", label: "Poor" },
           { value: "fair", label: "Fair" },
@@ -55,9 +60,13 @@ const ProfileSetupScreen = ({ navigation }: ProfileSetupScreenProps) => {
         ]}
         style={styles.segmented}
       />
+
+      {/* ---- Spending Category ---- */}
       <SegmentedButtons
-        value={spendingCategory || "general"}
-        onValueChange={(value) => setSpendingCategory(value as UserProfile["primarySpendingCategory"])}
+        value={spendingCategory ?? "general"}
+        onValueChange={(v) =>
+          setSpendingCategory((v ?? "general") as UserProfile["primarySpendingCategory"])
+        }
         buttons={[
           { value: "travel", label: "Travel" },
           { value: "dining", label: "Dining" },
@@ -67,6 +76,7 @@ const ProfileSetupScreen = ({ navigation }: ProfileSetupScreenProps) => {
         ]}
         style={styles.segmented}
       />
+
       <TextInput
         label="Monthly Spending"
         value={monthlySpending}
@@ -75,6 +85,7 @@ const ProfileSetupScreen = ({ navigation }: ProfileSetupScreenProps) => {
         style={styles.input}
         theme={theme}
       />
+
       <Button mode="contained" onPress={handleSubmit} style={styles.button}>
         Submit Survey
       </Button>

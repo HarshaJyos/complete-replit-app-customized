@@ -1,29 +1,21 @@
 import { getIdToken } from "firebase/auth";
 import { auth } from "../config/firebase";
-import {
-  CreditCard,
-  Recommendation,
-  Application,
-  UserProfile,
-} from "../../../shared/schema";
-import { Platform } from "react-native"; // Added for platform detection
+import { Platform } from "react-native";
 
 class ApiService {
   private getBaseUrl() {
-    const envUrl = process.env.EXPO_PUBLIC_API_URL;
-    if (envUrl) return envUrl;
+    // Use Expo env var in production, otherwise dev URL
+    const env = process.env.EXPO_PUBLIC_API_URL;
+    if (env) return env;
 
-    // For development: Android emulator uses 10.0.2.2, iOS/simulator uses localhost
-    if (Platform.OS === 'android') {
-      return "http://10.0.2.2:5000/api";
-    } else {
-      return "http://localhost:5000/api";
-    }
+    return Platform.OS === "android"
+      ? "http://10.0.2.2:5001/syamapp-955e0/us-central1/api"
+      : "http://localhost:5001/syamapp-955e0/us-central1/api";
   }
 
-  private async getHeaders() {
+  private async headers() {
     const user = auth.currentUser;
-    if (!user) throw new Error("No user logged in");
+    if (!user) throw new Error("Unauthenticated");
     const token = await getIdToken(user);
     return {
       "Content-Type": "application/json",
@@ -31,104 +23,91 @@ class ApiService {
     };
   }
 
-  async getCreditCards(category?: string): Promise<{ data: CreditCard[] }> {
-    const headers = await this.getHeaders();
-    const url = category
-      ? `${this.getBaseUrl()}/cards?category=${category}`
-      : `${this.getBaseUrl()}/cards`;
-    const response = await fetch(url, { headers });
-    return response.json();
-  }
-
-  async getRecommendations(
-    userId: string
-  ): Promise<{ data: Recommendation[] }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/recommendations/${userId}`, {
-      headers,
-    });
-    return response.json();
-  }
-
-  async generateRecommendations(
-    userId: string
-  ): Promise<{ data: Recommendation[] }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/recommendations/${userId}`, {
+  // ---------- USER ----------
+  async createProfile(profile: any) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/users`, {
       method: "POST",
-      headers,
-    });
-    return response.json();
-  }
-
-  async createApplication(
-    userId: string,
-    creditCardId: string
-  ): Promise<{ data: Application }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/applications`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ userId, creditCardId }),
-    });
-    return response.json();
-  }
-
-  async getUserApplications(userId: string): Promise<{ data: Application[] }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/applications/${userId}`, {
-      headers,
-    });
-    return response.json();
-  }
-
-  async getUserProfile(userId: string): Promise<{ data: UserProfile }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/users/${userId}`, {
-      headers,
-    });
-    return response.json();
-  }
-
-  async updateUserProfile(
-    userId: string,
-    profile: Partial<UserProfile>
-  ): Promise<{ data: UserProfile }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/users/${userId}`, {
-      method: "PUT",
-      headers,
+      headers: h,
       body: JSON.stringify(profile),
     });
-    return response.json();
+    return res.json();
   }
 
-  async createUserProfile(
-    userId: string,
-    profile: Partial<UserProfile>
-  ): Promise<{ data: UserProfile }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/users`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ ...profile, userId }),
-    });
-    return response.json();
+  async getProfile(uid: string) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/users/${uid}`, { headers: h });
+    return res.json();
   }
 
-  async getNotifications(userId: string): Promise<{ data: any[] }> {
-    const headers = await this.getHeaders();
-    const response = await fetch(`${this.getBaseUrl()}/notifications/${userId}`, {
-      headers,
-    });
-    return response.json();
-  }
-
-  async markNotificationRead(id: string): Promise<void> {
-    const headers = await this.getHeaders();
-    await fetch(`${this.getBaseUrl()}/notifications/${id}`, {
+  async updateProfile(uid: string, data: any) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/users/${uid}`, {
       method: "PUT",
-      headers,
+      headers: h,
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  }
+
+  // ---------- CARDS ----------
+  async getCards() {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/cards`, { headers: h });
+    return res.json();
+  }
+
+  // ---------- RECOMMENDATIONS ----------
+  async getRecommendations(uid: string) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/recommendations/${uid}`, {
+      headers: h,
+    });
+    return res.json();
+  }
+
+  async generateRecommendations(uid: string) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/recommendations/${uid}`, {
+      method: "POST",
+      headers: h,
+    });
+    return res.json();
+  }
+
+  // ---------- APPLICATIONS ----------
+  async apply(uid: string, cardId: string) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/applications`, {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify({ userId: uid, creditCardId: cardId }),
+    });
+    return res.json();
+  }
+
+  async getApplications(uid: string) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/applications/${uid}`, {
+      headers: h,
+    });
+    return res.json();
+  }
+
+  // ---------- NOTIFICATIONS ----------
+  async getNotifications(uid: string) {
+    const h = await this.headers();
+    const res = await fetch(`${this.getBaseUrl()}/notifications/${uid}`, {
+      headers: h,
+    });
+    return res.json();
+  }
+
+  async markRead(notifId: string) {
+    const h = await this.headers();
+    await fetch(`${this.getBaseUrl()}/notifications/${notifId}`, {
+      method: "PUT",
+      headers: h,
       body: JSON.stringify({ read: true }),
     });
   }
